@@ -313,6 +313,9 @@ include "root.php";
 			//check to see if the mac_address exists in devices
 				//if (strlen($_REQUEST['user_id']) == 0 || strlen($_REQUEST['userid']) == 0) {
 					if ($this->mac_exists($mac)) {
+                                              		if ($_SESSION['provision']['debug']['boolean'] == 'true') {
+                                                		echo "MAC Exist";
+                                                	}
 
 						//get the device_template
 							$sql = "select * from v_devices ";
@@ -390,13 +393,10 @@ include "root.php";
 								unset($row, $parameters);
 							}
 					}
-					else {
-
-							//use the user_agent to pre-assign a template for 1-hit provisioning. Enter the a unique string to match in the user agent, and the template it should match.
-							$templates['Linksys/SPA-2102'] = 'linksys/spa2102';
-							$templates['Linksys/SPA-3102'] = 'linksys/spa3102';
+					else { if ($_SESSION['provision']['debug']['boolean'] == 'true') { echo "MAC Exists!"; //use the user_agent to pre-assign a template for 1-hit provisioning. Enter the a unique string to 
+							match in the user agent, and the template it should match. $templates['Linksys/SPA-2102'] = 'linksys/spa2102'; $templates['Linksys/SPA-3102'] = 'linksys/spa3102'; 
 							$templates['Linksys/SPA-9212'] = 'linksys/spa921';
-
+						}
 							$templates['Cisco/SPA301'] = 'cisco/spa301';
 							$templates['Cisco/SPA301D'] = 'cisco/spa302d';
 							$templates['Cisco/SPA303'] = 'cisco/spa303';
@@ -503,7 +503,6 @@ include "root.php";
 							$templates['Vesa VCS754'] = 'vtech/vcs754';
 							$templates['Wget/1.11.3'] = 'konftel/kt300ip';
 							foreach ($templates as $key=>$value){
-								echo $_SERVER['HTTP_USER_AGENT'];
 								if(stripos($_SERVER['HTTP_USER_AGENT'],$key)!== false) {
 									$device_template = $value;
 									break;

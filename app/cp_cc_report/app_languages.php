@@ -12,6 +12,50 @@ $text['label-average']['uk'] = "";
 $text['label-average']['de-at'] = "Durchschnitt";
 $text['label-average']['he'] = "ממוצע";;
 
+$text['label-pause']['en-us'] = "Pause";
+$text['label-pause']['en-gb'] = "Pause";
+$text['label-pause']['ar-eg'] = "";
+$text['label-pause']['de-at'] = "Pause"; //copied from de-de
+$text['label-pause']['de-ch'] = "Pause"; //copied from de-de
+$text['label-pause']['de-de'] = "Pause";
+$text['label-pause']['es-cl'] = "Pausa";
+$text['label-pause']['es-mx'] = "Pausa"; //copied from es-cl
+$text['label-pause']['fr-ca'] = "Pause"; //copied from fr-fr
+$text['label-pause']['fr-fr'] = "Pause";
+$text['label-pause']['he-il'] = "";
+$text['label-pause']['it-it'] = "Pausa";
+$text['label-pause']['nl-nl'] = "";
+$text['label-pause']['pl-pl'] = "Pauza";
+$text['label-pause']['pt-br'] = "Pausado";
+$text['label-pause']['pt-pt'] = "Pausa";
+$text['label-pause']['ro-ro'] = "";
+$text['label-pause']['ru-ru'] = "Пауза";
+$text['label-pause']['sv-se'] = "Paus";
+$text['label-pause']['uk-ua'] = "Призупинити";
+
+$text['label-play']['en-us'] = "Play";
+$text['label-play']['en-gb'] = "Play";
+$text['label-play']['ar-eg'] = "";
+$text['label-play']['de-at'] = "Abspielen"; //copied from de-de
+$text['label-play']['de-ch'] = "Abspielen"; //copied from de-de
+$text['label-play']['de-de'] = "Abspielen";
+$text['label-play']['es-cl'] = "Reproducir";
+$text['label-play']['es-mx'] = "Reproducir"; //copied from es-cl
+$text['label-play']['fr-ca'] = "Jouer"; //copied from fr-fr
+$text['label-play']['fr-fr'] = "Jouer";
+$text['label-play']['he-il'] = "";
+$text['label-play']['it-it'] = "Suona";
+$text['label-play']['nl-nl'] = "";
+$text['label-play']['pl-pl'] = "Odtwórz";
+$text['label-play']['pt-br'] = "Tocar ";
+$text['label-play']['pt-pt'] = "Tocar";
+$text['label-play']['ro-ro'] = "";
+$text['label-play']['ru-ru'] = "Воспроизведение";
+$text['label-play']['sv-se'] = "Spela Upp";
+$text['label-play']['uk-ua'] = "Відтворити";
+
+
+
 
 $text['label-total']['en-us'] = "Total";
 $text['label-total']['es-cl'] = "Total";
@@ -291,6 +335,11 @@ $text['label-caller_id']['en-us'] = 'Caller ID';
 $text['label-caller_id']['es-cl'] = '';
 $text['label-caller_id']['pt-pt'] = '';
 $text['label-caller_id']['fr-fr'] = '';
+
+$text['label-recording']['en-us'] = 'Recording';
+$text['label-recording']['es-cl'] = '';
+$text['label-recording']['pt-pt'] = '';
+$text['label-recording']['fr-fr'] = '';
 
 $text['label-agent_name']['en-us'] = 'Agent';
 $text['label-agent_name']['es-cl'] = '';

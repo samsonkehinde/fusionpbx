@@ -28,10 +28,10 @@
 	/************	 Get the Call Summary for each date in the range selected	**************/
     foreach ($period as $date) {
     	// Set the defaults for each day.
-    	$sum_data[$date->format("Y-m-d")] = ['active_agents' => 0,'answer_missed'=>['answered' => 0, 'missed' => 0],'rt'=>['ring_time' => 0, 'talk_time' => 0],'avg_rt'=>['ring_time' => 0, 'talk_time' => 0]];
-	
+    	$sum_data[$date->format("Y-m-d")] = ['active_agents' => 0,'answer_missed'=>['answered' => 0, 'missed' => 0],'duration'=>['ring_time' => 0, 'talk_time' => 0],'avg_duration'=>['ring_time' => 0, 'talk_time' => 0]];
+
 	    /*************	Get the Call Summary Data	**************/
-	    $sql = "select direction,duration,waitsec,bridge_uuid,answer_stamp,billsec,sip_hangup_disposition,rtp_audio_in_mos from v_xml_cdr where cc_side = 'member' and direction = 'inbound' and last_app = 'callcenter' and domain_uuid = '". $domain_uuid . "' ";
+	    $sql = "select duration,waitsec,cc_agent_bridged,cc_cause,billsec,sip_hangup_disposition,rtp_audio_in_mos from v_xml_cdr where cc_side = 'member' and direction = 'inbound' and domain_uuid = '". $domain_uuid . "' ";
 		$sql .= " and start_stamp BETWEEN '" . $date->format("Y-m-d") . " 00:00:00.000' AND '" . $date->format("Y-m-d") . " 23:59:59.999'";
 		//echo $sql;
 		$prep_statement = $db->prepare(check_sql($sql));
@@ -42,7 +42,7 @@
 	    
 	    if ($result_count > 0) {
 	    	foreach($result as $row) {
-	    		if ($row['answer_stamp'] != '' && $row['bridge_uuid'] != '') { 
+	    		if ($row['cc_agent_bridged'] == true && $row['cc_cause'] == 'answered') { 
 					$call_result = 'answered';
 				}else {
 					$call_result = 'failed';
@@ -58,19 +58,23 @@
 					$talktime = 0;
 					$sum_data[$date->format("Y-m-d")]['answer_missed']['missed'] += 1;
 				}
-				$sum_data[$date->format("Y-m-d")]['rt']['ring_time'] += $waittime;
-				$sum_data[$date->format("Y-m-d")]['rt']['talk_time'] += $talktime;	
+				$sum_data[$date->format("Y-m-d")]['duration']['ring_time'] += $waittime;
+				$sum_data[$date->format("Y-m-d")]['duration']['talk_time'] += $talktime;	
 	    	}
 	    }
 	    
 	    //	Compute the Average Ringtime and Talktime.
-	    $sum_data[$date->format("Y-m-d")]['avg_rt']['ring_time'] = number_format($sum_data[$date->format("Y-m-d")]['rt']['ring_time'] / $result_count,2);
-	    $sum_data[$date->format("Y-m-d")]['avg_rt']['talk_time'] = number_format($sum_data[$date->format("Y-m-d")]['rt']['talk_time'] / $result_count,2);
+	    $sum_data[$date->format("Y-m-d")]['avg_duration']['ring_time'] = ($result_count)?number_format($sum_data[$date->format("Y-m-d")]['duration']['ring_time'] / $result_count,2) : 0;
+	    $sum_data[$date->format("Y-m-d")]['avg_duration']['talk_time'] = ($result_count)?number_format($sum_data[$date->format("Y-m-d")]['duration']['talk_time'] / $result_count,2) : 0;
+	    
+	    // Convert the Total ringtime/talktime to minutes.
+	    $sum_data[$date->format("Y-m-d")]['duration']['ring_time'] = ($sum_data[$date->format("Y-m-d")]['duration']['ring_time'])?number_format($sum_data[$date->format("Y-m-d")]['duration']['ring_time'] / 60,2) : 0;
+	    $sum_data[$date->format("Y-m-d")]['duration']['talk_time'] = ($sum_data[$date->format("Y-m-d")]['duration']['talk_time'])?number_format($sum_data[$date->format("Y-m-d")]['duration']['talk_time'] / 60,2) : 0;
 	    
 	    unset($result, $result_count);
 	    
 	    /*************	Get Action Agents	**************/
-	    $sql = "select count (distinct destination_number) as active_agents from v_xml_cdr where cc_side = 'member' and direction = 'inbound' and last_app = 'callcenter' and domain_uuid = '". $domain_uuid . "' ";
+	    $sql = "select count (distinct destination_number) as active_agents from v_xml_cdr where cc_side = 'member' and direction = 'inbound' and domain_uuid = '". $domain_uuid . "' ";
 		$sql .= " and start_stamp BETWEEN '" . $date->format("Y-m-d") . " 00:00:00.000' AND '" . $date->format("Y-m-d") . " 23:59:59.999'";
 		//echo $sql;
 		$prep_statement = $db->prepare(check_sql($sql));

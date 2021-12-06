@@ -350,12 +350,12 @@
 <Station_Name group="Phone/General">{$device_label}</Station_Name>
 <Station_Display_Name group="Phone/General">{$account.1.display_name}</Station_Display_Name>
 <Voice_Mail_Number group="Phone/General">{$voicemail_number}</Voice_Mail_Number>
-<Text_Logo group="Phone/General" />
-<BMP_Picture_Download_URL group="Phone/General" />
-<Select_Logo group="Phone/General">Default</Select_Logo>
-<Select_Background_Picture group="Phone/General">None</Select_Background_Picture>
+<Text_Logo group="Phone/General">CardinalStone</Text_Logo>
+<BMP_Picture_Download_URL group="Phone/General">http://pbx.cardinalstone.com/app/provision/logo.bmp</BMP_Picture_Download_URL>
+<Select_Logo group="Phone/General">Text Logo</Select_Logo>
+<Select_Background_Picture group="Phone/General">Text Logo</Select_Background_Picture>
 <Softkey_Labels_Font group="Phone/General">Auto</Softkey_Labels_Font>
-<Screen_Saver_Enable group="Phone/General">No</Screen_Saver_Enable>
+<Screen_Saver_Enable group="Phone/General">Yes</Screen_Saver_Enable>
 <Screen_Saver_Wait group="Phone/General">300</Screen_Saver_Wait>
 <Screen_Saver_Icon group="Phone/General">Background Picture</Screen_Saver_Icon>
 
@@ -447,8 +447,8 @@
 <LDAP_Number_Mapping group="Phone/LDAP_Corporate_Directory_Search" />
 
 <!-- Phone/XML_Service -->
-<XML_Directory_Service_Name group="Phone/XML_Service" />
-<XML_Directory_Service_URL group="Phone/XML_Service" />
+<XML_Directory_Service_Name group="Phone/XML_Service">CardinalStone</XML_Directory_Service_Name>
+<XML_Directory_Service_URL group="Phone/XML_Service">http://pbx.cardinalstone.com/app/provision/phoneApps/dir.php</XML_Directory_Service_URL>
 <XML_Application_Service_Name group="Phone/XML_Service" />
 <XML_Application_Service_URL group="Phone/XML_Service" />
 <XML_User_Name group="Phone/XML_Service" />

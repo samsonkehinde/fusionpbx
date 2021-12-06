@@ -72,13 +72,13 @@
 	echo "		<td align='left' nowrap='nowrap' style='vertical-align: top;'><b>".$text['title']."</b><br><br><br></td>\n";
 	echo "		<td align='right' width='100%' style='vertical-align: top;'>\n";
 	echo "			<form id='frm_export' method='post' action='cc_report_compare_export.php'>\n";
-	echo "				<input type='hidden' id='start_date' name='start_date' value='$start_date'\>\n";
-	echo "				<input type='hidden' id='end_date' name='end_date' value='$end_date'\>\n";
+	echo "				<input type='hidden' name='start_date' value='$start_date'\>\n";
+	echo "				<input type='hidden' name='end_date' value='$end_date'\>\n";
 	echo "				<table cellpadding='0' cellspacing='0' border='0'>\n";
 	echo "					<tr>\n";
 	echo "						<td style='vertical-align: top;'>\n";
-	echo "							<input type='button' class='btn' value='".$text['button-export']."' onclick=\"toggle_select('export_format');\">\n";
-	echo "							<input type='button' class='btn' value='".$text['button-back']."' onclick=\"document.location.href='cc_report.php';\" />\n";
+	echo button::create(['type'=>'button','label'=>$text['button-export'],'icon'=>$_SESSION['theme']['button_icon_export'],'onclick'=>"toggle_select('export_format'); this.blur();"]);
+	echo button::create(['type'=>'button','label'=>$text['button-back'],'icon'=>'arrow-circle-left','link'=>"cc_report.php"]);
 	echo "						</td>\n";
 	echo "						<td style='vertical-align: top;'>\n";
 	echo "							<select class='formfld' style='display: none; width: auto; margin-left: 3px;' name='export_format' id='export_format' onchange=\"process_export();\">\n";
@@ -105,36 +105,22 @@
 	
 //basic search of Call Center call records
 	echo "<form method='get' action=''>\n";
-	echo "<table width='100%' border='0' cellpadding='0' cellspacing='0'>\n";
-	echo "	<tr>\n";
-			echo "<td width='35%' style='vertical-align: top;'>\n";
-				echo "<table width='100%' border='0' cellpadding='0' cellspacing='0'>\n";
-				echo "	<tr>\n";
-				echo "		<td class='vncell' valign='top' nowrap='nowrap'>\n";
-				echo "			".$text['label-date']."\n";
-				echo "		</td>\n";
-				echo "		<td class='vtable' align='left' style='position: relative; min-width: 250px;'>\n";
-				echo "			<input type='text' class='formfld datepicker' style='min-width: 115px; width: 115px;' name='start_date' placeholder='".$text['label-from'] . "' value='$start_date'/>\n";
-				echo "			<input type='text' class='formfld datepicker' style='min-width: 115px; width: 115px;' name='end_date' placeholder='".$text['label-to'] . "' value='$end_date'/>\n";
-				echo "		</td>\n";
-				echo "	</tr>\n";
-				echo "</table>\n";
-			echo "</td>";			
+	echo "	<div class='form_grid'>\n";
 
-	echo "	</tr>";
-	echo "</table>";
 
-	echo "<table width='100%' border='0' cellpadding='0' cellspacing='0'>\n";
-	echo "	<tr>";
-	echo "		<td style='padding-top: 8px;' align='left'>";
-	echo 			$text['description_compare'];
-	echo "		</td>";
-	echo "		<td style='padding-top: 8px;' align='right' nowrap>";
-	echo "			<input type='button' class='btn' value='".$text['button-reset']."' onclick=\"document.location.href='cc_report_compare.php';\">\n";
-	echo "			<input type='submit' class='btn' name='submit' value='".$text['button-submit']."'>\n";
-	echo "		</td>";
-	echo "	</tr>";
-	echo "</table>";
+	echo "		<div class='form_set'>\n";
+	echo "			<div class='label'>" .$text['label-date']."</div>\n";
+	echo "			<div class='field no-wrap'>\n";
+	echo "				<input type='text' class='formfld datetimepicker' data-toggle='datetimepicker' data-target='#start_date' data-date-format='YYYY-MM-DD' onblur=\"$(this).datetimepicker('hide');\" name='start_date' id='start_date' placeholder='".$text['label-from']."' value='".escape($start_date)."' autocomplete='off'>\n";
+	echo "				<input type='text' class='formfld datetimepicker' data-toggle='datetimepicker' data-target='#end_date' data-date-format='YYYY-MM-DD' onblur=\"$(this).datetimepicker('hide');\" name='end_date' id='end_date' placeholder='".$text['label-to']."' value='".escape($end_date)."' autocomplete='off'>\n";
+	echo "			</div>\n";
+	echo "		</div>\n";
+	echo "	</div>\n";
+	
+	echo "	<div style='float: right; padding-top: 15px; margin-left: 20px; white-space: nowrap;'>";
+	echo button::create(['label'=>$text['button-reset'],'icon'=>$_SESSION['theme']['button_icon_reset'],'type'=>'button','link'=>'cc_report_compare.php']);
+	echo button::create(['label'=>$text['button-submit'],'icon'=>'search','type'=>'submit','id'=>'btn_save','name'=>'submit','value' => $text['button-search']]);
+	echo "	</div>\n";
 
 	echo "</form>";
 	echo "<br /><br />";
@@ -166,10 +152,10 @@
 	foreach ($sum_data as $value) {
 		echo "	plotData[0].push(" . $value['answer_missed']['missed'] . ");\n";
 		echo "	plotData[1].push(" . $value['answer_missed']['answered'] . ");\n";
-		echo "	plotData[2].push(" . $value['rt']['ring_time'] . ");\n";
-		echo "	plotData[3].push(" . $value['rt']['talk_time'] . ");\n";
-		echo "	plotData[4].push(" . $value['avg_rt']['ring_time'] . ");\n";
-		echo "	plotData[5].push(" . $value['avg_rt']['talk_time'] . ");\n";
+		echo "	plotData[2].push(" . $value['duration']['ring_time'] . ");\n";
+		echo "	plotData[3].push(" . $value['duration']['talk_time'] . ");\n";
+		echo "	plotData[4].push(" . $value['avg_duration']['ring_time'] . ");\n";
+		echo "	plotData[5].push(" . $value['avg_duration']['talk_time'] . ");\n";
 		echo "	plotData[6].push(" . $value['active_agents'] . ");\n";
 		//unset($value);
 	}
@@ -203,10 +189,10 @@
 		echo "	<td valign='top' class='".$row_style[$c]."' >". $key ."</td>\n";		
 		echo "	<td valign='top' class='".$row_style[$c]."' >". $value['answer_missed']['answered'] ."</td>\n";
 		echo "	<td valign='top' class='".$row_style[$c]."' >". $value['answer_missed']['missed'] ."</td>\n";
-		echo "	<td valign='top' class='".$row_style[$c]."' >". gmdate("G:i:s", $value['rt']['ring_time']) ."</td>\n";	
-		echo "	<td valign='top' class='".$row_style[$c]."' >". gmdate("G:i:s", $value['rt']['talk_time']) ."</td>\n";
-		echo "	<td valign='top' class='".$row_style[$c]."' >". gmdate("G:i:s", $value['avg_rt']['ring_time']) ."</td>\n";	
-		echo "	<td valign='top' class='".$row_style[$c]."' >". gmdate("G:i:s", $value['avg_rt']['talk_time']) ."</td>\n";
+		echo "	<td valign='top' class='".$row_style[$c]."' >". gmdate("G:i:s", $value['duration']['ring_time']) ."</td>\n";	
+		echo "	<td valign='top' class='".$row_style[$c]."' >". gmdate("G:i:s", $value['duration']['talk_time']) ."</td>\n";
+		echo "	<td valign='top' class='".$row_style[$c]."' >". gmdate("G:i:s", $value['avg_duration']['ring_time']) ."</td>\n";	
+		echo "	<td valign='top' class='".$row_style[$c]."' >". gmdate("G:i:s", $value['avg_duration']['talk_time']) ."</td>\n";
 		echo "	<td valign='top' class='".$row_style[$c]."' >". $value['active_agents'] ."</td>\n";
 		
 		echo "</tr>\n";
@@ -269,13 +255,7 @@
 						backgroundColor: 'rgb(224, 133, 133)',
 						data: plotData[6],
 						stack: 'Stack 3'
-					},
-					/*{
-						label: 'Total Agents',
-						backgroundColor: ['rgb(113, 218, 113)'],
-						data: [13],
-						stack: 'Stack 3'
-					}*/
+					}
 				]
 	
 			},

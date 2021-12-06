@@ -51,7 +51,7 @@ require_once "resources/check_auth.php";
 
 		$filename = "cdr_".date("Ymd_His").".xlsx";
 
-		foreach($summary_data as $call_record) {
+		foreach($summary_data as $call_record) {//Start ForEach
 			$writer->writeSheetRow('CallCenter Data',
 				[
 					($call_record['call_result'] == 'answered') ? 'Answered' : 'Missed',

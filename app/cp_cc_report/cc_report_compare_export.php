@@ -56,10 +56,10 @@ require_once "resources/check_auth.php";
 					$key,
 					$value['answer_missed']['answered'],
 					$value['answer_missed']['missed'],
-					gmdate("H:i:s",$value['rt']['ring_time']),
-					gmdate("H:i:s",$value['rt']['talk_time']),
-					gmdate("H:i:s",$value['avg_rt']['ring_time']),
-					gmdate("H:i:s",$value['avg_rt']['talk_time']),
+					gmdate("H:i:s",$value['duration']['ring_time']),
+					gmdate("H:i:s",$value['duration']['talk_time']),
+					gmdate("H:i:s",$value['avg_duration']['ring_time']),
+					gmdate("H:i:s",$value['avg_duration']['talk_time']),
 					$value['active_agents']
 				]
 			);
@@ -138,10 +138,10 @@ require_once "resources/check_auth.php";
 				$total['missed'] += $value['answer_missed']['missed'];
 				$data_body[$p] .= '<td width="15%">'.$value['answer_missed']['answered'].'</td>';
 				$data_body[$p] .= '<td width="15%">'.$value['answer_missed']['missed'].'</td>';
-				$total['ring_time'] += $value['rt']['ring_time'];
-				$data_body[$p] .= '<td width="20%">'.gmdate("G:i:s",$value['rt']['ring_time']).'</td>';
-				$total['talk_time'] += $value['rt']['talk_time'];
-				$data_body[$p] .= '<td width="20%">'.gmdate('G:i:s',$value['rt']['talk_time']).'</td>';
+				$total['ring_time'] += $value['duration']['ring_time'];
+				$data_body[$p] .= '<td width="20%">'.gmdate("G:i:s",$value['duration']['ring_time']).'</td>';
+				$total['talk_time'] += $value['duration']['talk_time'];
+				$data_body[$p] .= '<td width="20%">'.gmdate('G:i:s',$value['duration']['talk_time']).'</td>';
 				$total['agents'] += $value['active_agents'];
 				$data_body[$p] .= '<td width="10%">'.$value['active_agents'].'</td>';
 				$data_body[$p] .= '</tr>';
@@ -190,7 +190,6 @@ require_once "resources/check_auth.php";
 		$data_footer .= '<td><b>'.round($total['missed']/$z,1).'</b></td>';
 		$data_footer .= '<td><b>'.gmdate("G:i:s", round($total['ring_time']/$z)).'</b></td>';
 		$data_footer .= '<td><b>'.gmdate("G:i:s", round($total['talk_time']/$z)).'</b></td>';
-		//$data_footer .= '<td colspan="2"></td>';
 		$data_footer .= '<td><b>'.round($total['agents']/$z,1).'</b></td>';
 		$data_footer .= '</tr>';
 		

@@ -86,7 +86,7 @@
 		$sql = "select count(f.fax_uuid) from v_fax as f ";
 		$sql .= "where f.domain_uuid = :domain_uuid ";
 		if (isset($search)) {
-			$sql = "and (";
+			$sql .= "and (";
 			$sql .= "	lower(fax_name) like :search ";
 			$sql .= "	or lower(fax_email) like :search ";
 			$sql .= "	or lower(fax_extension) like :search ";
@@ -108,7 +108,7 @@
 		$sql .= "and f.domain_uuid = :domain_uuid ";
 		$sql .= "and u.user_uuid = :user_uuid ";
 		if (isset($search)) {
-			$sql = "and (";
+			$sql .= "and (";
 			$sql .= "	lower(fax_name) like :search ";
 			$sql .= "	or lower(fax_email) like :search ";
 			$sql .= "	or lower(fax_extension) like :search ";
@@ -287,6 +287,7 @@
 					$box = 'inbox';
 				}
 				echo "		<a href='".$file."?order_by=fax_date&order=desc&id=".urlencode($row['fax_uuid'])."&box=".$box."'>".$text['label-inbox']."</a>&nbsp;&nbsp;";
+				echo "		<a href='fax_outbox.php?id=".urlencode($row['fax_uuid'])."'>".$text['label-outbox']."</a>&nbsp;&nbsp;";
 			}
 			if (permission_exists('fax_sent_view')) {
 				echo "		<a href='fax_files.php?order_by=fax_date&order=desc&id=".urlencode($row['fax_uuid'])."&box=sent'>".$text['label-sent']."</a>&nbsp;&nbsp;";

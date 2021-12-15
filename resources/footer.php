@@ -141,7 +141,7 @@
 				$settings['theme']['menu_side_toggle_hover_delay_contract'] = is_numeric($settings['theme']['menu_side_toggle_hover_delay_contract']) ? $settings['theme']['menu_side_toggle_hover_delay_contract'] : '1000';
 				$settings['theme']['menu_style'] = $settings['theme']['menu_style'] != '' ? $settings['theme']['menu_style'] : 'fixed';
 				$settings['theme']['menu_position'] = $settings['theme']['menu_position'] != '' ? $settings['theme']['menu_position'] : 'top';
-				$settings['theme']['footer'] = $settings['theme']['footer'] != '' ? $settings['theme']['footer'] : '&copy; '.$text['theme-label-copyright'].' 2008 - '.date('Y')." <a href='http://www.fusionpbx.com' class='footer' target='_blank'>fusionpbx.com</a> ".$text['theme-label-all_rights_reserved'];
+				$settings['theme']['footer'] = $settings['theme']['footer'] != '' ? $settings['theme']['footer'] : '&copy; '.$text['theme-label-copyright'].' 2008 - '.date('Y')." <a href='http://www.cloudpractice.cloud' class='footer' target='_blank'>cloudpractice.com</a> ".$text['theme-label-all_rights_reserved'];
 			$view->assign('settings', $settings);
 		}
 	//document title

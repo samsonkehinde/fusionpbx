@@ -17,7 +17,7 @@
 
 	The Initial Developer of the Original Code is
 	Mark J Crane <markjcrane@fusionpbx.com>
-	Portions created by the Initial Developer are Copyright (C) 2008-2018
+	Portions created by the Initial Developer are Copyright (C) 2008-2022
 	the Initial Developer. All Rights Reserved.
 
 	Contributor(s):
@@ -110,8 +110,9 @@ if (!function_exists('tiff2pdf')) {
 		$fax_file_name = $tiff_file['filename'];
 		$pdf_file_name = path_join( $dir_fax, $fax_file_name . '.pdf' );
 
-		if (file_exists($pdf_file_name))
+		if (file_exists($pdf_file_name)) {
 			return $pdf_file_name;
+		}
 
 		$dir_fax_temp = $_SESSION['server']['temp']['dir'];
 		if (!$dir_fax_temp){
@@ -189,84 +190,6 @@ if (!function_exists('tiff2pdf')) {
 		}
 
 		return $pdf_file_name;
-	}
-}
-
-if (!function_exists('fax_enqueue')) {
-	function fax_enqueue($fax_uuid, $fax_file, $wav_file, $reply_address, $fax_uri, $fax_dtmf, $dial_string) {
-		global $db_type;
-
-		$fax_task_uuid = uuid();
-		$dial_string .= "fax_task_uuid='".$fax_task_uuid."',";
-		$description = ''; //! @todo add description
-		if ($db_type == "pgsql") {
-			$date_utc_now_sql  = "NOW() at time zone 'utc'";
-		}
-		if ($db_type == "mysql") {
-			$date_utc_now_sql  = "UTC_TIMESTAMP()";
-		}
-		if ($db_type == "sqlite") {
-			$date_utc_now_sql  = "datetime('now')";
-		}
-
-		$sql = "insert into v_fax_tasks";
-		$sql .= "( ";
-		$sql .= "fax_task_uuid, ";
-		$sql .= "fax_uuid, ";
-		$sql .= "task_next_time, ";
-		$sql .= "task_lock_time, ";
-		$sql .= "task_fax_file, ";
-		$sql .= "task_wav_file, ";
-		$sql .= "task_uri, ";
-		$sql .= "task_dial_string, ";
-		$sql .= "task_dtmf, ";
-		$sql .= "task_interrupted, ";
-		$sql .= "task_status, ";
-		$sql .= "task_no_answer_counter, ";
-		$sql .= "task_no_answer_retry_counter,";
-		$sql .= "task_retry_counter, ";
-		$sql .= "task_reply_address, ";
-		$sql .= "task_description ";
-		$sql .= ") ";
-		$sql .= "values ( ";
-		$sql .= ":fax_task_uuid, ";
-		$sql .= ":fax_uuid, ";
-		$sql .= $date_utc_now_sql.", ";
-		$sql .= "null, ";
-		$sql .= ":fax_file, ";
-		$sql .= ":wav_file, ";
-		$sql .= ":fax_uri, ";
-		$sql .= ":dial_string, ";
-		$sql .= ":fax_dtmf, ";
-		$sql .= "'false', ";
-		$sql .= "0, ";
-		$sql .= "0, ";
-		$sql .= "0, ";
-		$sql .= "0, ";
-		$sql .= ":reply_address, ";
-		$sql .= ":description ";
-		$sql .= ") ";
-		$parameters['fax_task_uuid'] = $fax_task_uuid;
-		$parameters['fax_uuid'] = $fax_uuid;
-		$parameters['fax_file'] = $fax_file;
-		$parameters['wav_file'] = $wav_file;
-		$parameters['fax_uri'] = $fax_uri;
-		$parameters['dial_string'] = $dial_string;
-		$parameters['fax_dtmf'] = $fax_dtmf;
-		$parameters['reply_address'] = $reply_address;
-		$parameters['description'] = $description;
-		$database = new database;
-		$database->execute($sql, $parameters);
-		$response = $database->message();
-		if ($response['message'] == 'OK' && $response['code'] == '200') {
-			return 'Success';
-		}
-		else{
-			//! @todo log error
-			view_array($response);
-			return 'Failed';
-		}
-		unset($sql, $parameters, $response);
 	}
 }
 
@@ -388,64 +311,16 @@ if (!function_exists('fax_split_dtmf')) {
 	unset($sql, $parameters, $result);
 
 //prepare smtp server settings
-	// load default smtp settings
-	$smtp['method'] = $_SESSION['email']['smtp_method']['text'];
-	$smtp['host'] = (strlen($_SESSION['email']['smtp_host']['text'])?$_SESSION['email']['smtp_host']['text']:'127.0.0.1');
-	if (isset($_SESSION['email']['smtp_port'])) {
-		$smtp['port'] = (int)$_SESSION['email']['smtp_port']['numeric'];
-	}
-	else {
-		$smtp['port'] = 0;
-	}
-
-	$smtp['secure'] = $_SESSION['email']['smtp_secure']['text'];
-	$smtp['auth'] = $_SESSION['email']['smtp_auth']['text'];
-	$smtp['username'] = $_SESSION['email']['smtp_username']['text'];
-	$smtp['password'] = $_SESSION['email']['smtp_password']['text'];
-	$smtp['from'] = $_SESSION['email']['smtp_from']['text'];
-	$smtp['from_name'] = $_SESSION['email']['smtp_from_name']['text'];
-
+	$email_from_address = $_SESSION['email']['smtp_from']['text'];
+	$email_from_name = $_SESSION['email']['smtp_from_name']['text'];
 	if (isset($_SESSION['fax']['smtp_from']['text']) && strlen($_SESSION['fax']['smtp_from']['text']) > 0) {
-		$smtp['from'] = $_SESSION['fax']['smtp_from']['text'];
+		$email_from_address = $_SESSION['fax']['smtp_from']['text'];
 	}
 	if (isset($_SESSION['fax']['smtp_from_name']['text']) && strlen($_SESSION['fax']['smtp_from_name']['text']) > 0) {
-		$smtp['from_name'] = $_SESSION['fax']['smtp_from_name']['text'];
+		$email_from_name = $_SESSION['fax']['smtp_from_name']['text'];
 	}
 
-	// overwrite with domain-specific smtp server settings, if any
-	if (is_uuid($domain_uuid)) {
-		$sql = "select ";
-		$sql .= "domain_setting_subcategory, ";
-		$sql .= "domain_setting_value ";
-		$sql .= "from v_domain_settings ";
-		$sql .= "where domain_uuid = :domain_uuid ";
-		$sql .= "and ( ";
-		$sql .= "domain_setting_category = 'email' ";
-		$sql .= "or domain_setting_category = 'fax' ";
-		$sql .= ") ";
-		$sql .= "and domain_setting_name = 'text' ";
-		$sql .= "and domain_setting_enabled = 'true' ";
-		$parameters['domain_name'] = $domain_name;
-		$database = new database;
-		$result = $database->select($sql, $parameters, 'all');
-		if (is_array($result) && @sizeof($result) != 0) {
-			foreach ($result as $row) {
-				if ($row['domain_setting_value'] != '') {
-					$smtp[str_replace('smtp_','',$row["domain_setting_subcategory"])] = $row['domain_setting_value'];
-				}
-			}
-		}
-		unset($sql, $parameters, $result, $row);
-	}
-
-	// value adjustments
-	$smtp['method'] = ($smtp['method'] == '') ? 'smtp' : $smtp['method'];
-	$smtp['auth'] = ($smtp['auth'] == "true") ? true : false;
-	$smtp['password'] = ($smtp['password'] != '') ? $smtp['password'] : null;
-	$smtp['secure'] = ($smtp['secure'] != "none") ? $smtp['secure'] : null;
-	$smtp['username'] = ($smtp['username'] != '') ? $smtp['username'] : null;
-
-//get the fax details from the database
+//get the fax settings from the database
 	$sql = "select * from v_fax ";
 	$sql .= "where domain_uuid = :domain_uuid ";
 	$sql .= "and fax_extension = :fax_extension ";
@@ -454,7 +329,7 @@ if (!function_exists('fax_split_dtmf')) {
 	$database = new database;
 	$row = $database->select($sql, $parameters, 'row');
 	if (is_array($row) && @sizeof($row) != 0) {
-		//$fax_email = $row["fax_email"];
+		$fax_email = $row["fax_email"];
 		$fax_uuid = $row["fax_uuid"];
 		$fax_accountcode = $row["fax_accountcode"];
 		$fax_prefix = $row["fax_prefix"];
@@ -583,115 +458,110 @@ if (!function_exists('fax_split_dtmf')) {
 							fclose($fp);
 					}
 			}
-			else{
-				$wav_file = '';
-				$response = fax_enqueue($fax_uuid, $fax_file, $wav_file, $mailto_address, $fax_uri, $fax_dtmf, $dial_string);
-			}
 		}
 	}
 
 //send the email
 	if (strlen($fax_email) > 0 && file_exists($fax_file)) {
-		//prepare the message
-			$tmp_subject = (($fax_email_inbound_subject_tag != '') ? "[".$fax_email_inbound_subject_tag."]" : "Fax Received").": ".$fax_file_name;
 
-			$tmp_text_html = "<br><strong>Fax Received</strong><br><br>";
-			$tmp_text_html .= "Name: ".$fax_file_name."<br>";
-			$tmp_text_html .= "Extension: ".$fax_extension."<br>";
-			$tmp_text_html .= "Messages: ".$fax_messages."<br>";
-			$tmp_text_html .= $fax_file_warning."<br>";
-			if ($fax_relay == 'yes') {
-				$tmp_subject = "Fax Received for Relay: ".$fax_file_name;
-				$tmp_text_html .= "<br>This message arrived successfully from your fax machine, and has been queued for outbound fax delivery. You will be notified later as to the success or failure of this fax.<br>";
-			}
-			$tmp_text_plain = strip_tags(str_replace("<br>", "\n", $tmp_text_html));
+		//get the language code
+			$language_code = $_SESSION['domain']['language']['code'];
 
-		//prepare the mail object
-			$mail = new PHPMailer();
-			if (isset($smtp['method'])) {
-				switch($smtp['method']) {
-					case 'sendmail': $mail->IsSendmail(); break;
-					case 'qmail': $mail->IsQmail(); break;
-					case 'mail': $mail->IsMail(); break;
-					default: $mail->IsSMTP(); break;
-				}
+		//get the template subcategory
+			if ($fax_relay == 'true') {
+				$template_subcategory = 'relay';
 			}
 			else {
-				$mail->IsSMTP(); // set mailer to use SMTP
+				$template_subcategory = 'inbound';
 			}
 
-		//optionally skip certificate validation
-			if (isset($_SESSION['email']['smtp_validate_certificate'])) {
-				if ($_SESSION['email']['smtp_validate_certificate']['boolean'] == "false") {
-
-					// this works around TLS certificate problems e.g. self-signed certificates
-					$mail->SMTPOptions = array(
-						'ssl' => array(
-						'verify_peer' => false,
-						'verify_peer_name' => false,
-						'allow_self_signed' => true
-						)
-					);
+		//get the email template from the database
+			if (isset($fax_email) && strlen($fax_email) > 0) {
+				$sql = "select template_subject, template_body from v_email_templates ";
+				$sql .= "where (domain_uuid = :domain_uuid or domain_uuid is null) ";
+				$sql .= "and template_language = :template_language ";
+				$sql .= "and template_category = :template_category ";
+				$sql .= "and template_subcategory = :template_subcategory ";
+				$sql .= "and template_type = :template_type ";
+				$sql .= "and template_enabled = 'true' ";
+				$parameters['domain_uuid'] = $domain_uuid;
+				$parameters['template_language'] = $language_code;
+				$parameters['template_category'] = 'fax';
+				$parameters['template_subcategory'] = $template_subcategory;
+				$parameters['template_type'] = 'html';
+				$database = new database;
+				$row = $database->select($sql, $parameters, 'row');
+				if (is_array($row)) {
+					$email_subject = $row['template_subject'];
+					$email_body = $row['template_body'];
 				}
+				unset($sql, $parameters);
 			}
 
-			if ($smtp['auth'] == "true") {
-				$mail->SMTPAuth = $smtp['auth']; // turn on/off SMTP authentication
-			}
-			$mail->Host = $smtp['host'];
-			if (strlen($smtp['port']) > 0) {
-				$mail->Port = $smtp['port'];
-			}
-			if (strlen($smtp['secure']) > 0 && $smtp['secure'] != 'none') {
-				$mail->SMTPSecure = $smtp['secure'];
-			}
-			if ($smtp['username'] != '') {
-				$mail->Username = $smtp['username'];
-				$mail->Password = $smtp['password'];
-			}
-			$mail->SMTPDebug  = 2;
-			$mail->From = $smtp['from'];
-			$mail->FromName = $smtp['from_name'];
-			$mail->Subject = $tmp_subject;
-			$mail->AltBody = $tmp_text_plain;
-			$mail->MsgHTML($tmp_text_html);
+		//replace variables in email subject
+			$email_subject = str_replace('${domain_name}', $_SESSION['domain_name'], $email_subject);
+			$email_subject = str_replace('${fax_file_name}', $fax_file_name, $email_subject);
+			$email_subject = str_replace('${fax_extension}', $fax_extension, $email_subject);
+			$email_subject = str_replace('${fax_messages}', $fax_messages, $email_subject);
+			$email_subject = str_replace('${fax_file_warning}', $fax_file_warning, $email_subject);
+			$email_subject = str_replace('${fax_subject_tag}', $fax_email_inbound_subject_tag, $email_subject);
 
-			$tmp_to = $fax_email;
-			$tmp_to = str_replace(";", ",", $tmp_to);
-			$tmp_to_array = explode(",", $tmp_to);
-			foreach($tmp_to_array as $tmp_to_row) {
-				if (strlen($tmp_to_row) > 0) {
-					echo "tmp_to_row: $tmp_to_row\n";
-					$mail->AddAddress(trim($tmp_to_row));
+		//replace variables in email body
+			$email_body = str_replace('${domain_name}', $_SESSION['domain_name'], $email_body);
+			$email_body = str_replace('${fax_file_name}', $fax_file_name, $email_body);
+			$email_body = str_replace('${fax_extension}', $fax_extension, $email_body);
+			$email_body = str_replace('${fax_messages}', $fax_messages, $email_body);
+			$email_body = str_replace('${fax_file_warning}', $fax_file_warning, $email_body);
+			$email_body = str_replace('${fax_subject_tag}', $fax_email_inbound_subject_tag, $email_body);
+
+		//debug info
+			//echo "<hr />\n";
+			//echo "email_address ".$fax_email."<br />\n";
+			//echo "email_subject ".$email_subject."<br />\n";
+			//echo "email_body ".$email_body."<br />\n";
+			//echo "<hr />\n";
+
+		//send the email
+			if (isset($fax_email) && strlen($fax_email) > 0) {
+				//add the attachment
+				if (strlen($fax_file_name) > 0) {
+					$email_attachments[0]['type'] = 'file';
+					if ($pdf_file && file_exists($pdf_file)) {
+						$email_attachments[0]['name'] = $fax_file_name.'.pdf';
+						$email_attachments[0]['value'] = $pdf_file;
+					}
+					else {
+						$email_attachments[0]['name'] = $fax_file_name.'.tif';
+						$email_attachments[0]['value'] = $fax_file;
+					}
 				}
+
+				//$email_response = send_email($email_address, $email_subject, $email_body);
+				$email = new email;
+				$email->recipients = $fax_email;
+				$email->subject = $email_subject;
+				$email->body = $email_body;
+				$email->from_address = $email_from_address;
+				$email->from_name = $email_from_name;
+				$email->attachments = $email_attachments;
+				//$email->debug_level = 3;
+				$response = $mail->error;
+				$sent = $email->send();
 			}
 
 		//output to the log
-			echo "smtp_host: ".$smtp['host']."\n";
-			echo "smtp_from: ".$smtp['from']."\n";
-			echo "smtp_from_name: ".$smtp['from_name']."\n";
-			echo "tmp_subject: $tmp_subject\n";
-
-		//add the attachments
-			if (strlen($fax_file_name) > 0) {
-				if ($pdf_file && file_exists($pdf_file)) {
-					$mail->AddAttachment($pdf_file); // pdf attachment
-				}
-				else {
-					$mail->AddAttachment($fax_file); // tif attachment
-				}
-				//$filename='fax.tif'; $encoding = "base64"; $type = "image/tif";
-				//$mail->AddStringAttachment(base64_decode($strfax),$filename,$encoding,$type);
-			}
+			echo "email_from_address: ".$email_from_address."\n";
+			echo "email_from_name: ".$email_from_address."\n";
+			echo "email_subject: $email_subject\n";
 
 		//send the email
-			if (!$mail->Send()) {
-				echo "Mailer Error: " . $mail->ErrorInfo;
-				$email_status=$mail;
+			if ($sent) {
+				echo "Mailer Error";
+				$email_status='failed';
 			}
 			else {
 				echo "Message sent!";
-				$email_status="ok";
+				$email_status='ok';
 			}
 	}
 
